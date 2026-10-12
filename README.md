@@ -17,19 +17,20 @@ It also debloats small release binaries and improves compile times. A stripped h
 
 ## Usage
 
-Supports zig 0.16.0 and 0.17.0. staticio provides both a mechanism to create a patched std, with [patch](patch), and a patch for it, `src/std-<zig version>.patch`. The mechanism takes other patches in addition to staticio's. Import the patched std as `std` in a compile step's root module, which replaces std for the whole compilation:
+Supports zig 0.16.0 and 0.17.0. staticio is a patch of std, applied with [zig-patch](https://github.com/marler8997/zig-patch), so depend on both. `namedLazyPath("std.patch")` is the patch for the zig doing the build:
 
 ```zig
 // build.zig
-const staticio = b.dependency("staticio", .{});
-const patched_std = @import("staticio").addPatchedStd(staticio, &.{
-    staticio.path("src/std-0.17.0.patch"), // or src/std-0.16.0.patch
-    b.path("my-std.patch"),
-});
+const patched_std = b.dependency("patch", .{
+    .std_patches = &[_]std.Build.LazyPath{
+        b.dependency("staticio", .{}).namedLazyPath("std.patch"),
+        // any other std patches go here too
+    },
+}).module("std");
 exe.root_module.addImport("std", patched_std);
-// or with only staticio's patch:
-exe.root_module.addImport("std", staticio.module("std"));
 ```
+
+Importing it as `std` in a compile step's root module replaces std for the whole compilation. [test/build.zig](test/build.zig) is a complete example.
 
 ```zig
 // root source file

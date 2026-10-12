@@ -23,12 +23,9 @@ jobs:
       - uses: marler8997/setup-anyzig@master
       - if: ${{ !matrix.skip_zig16 }}
         run: zig 0.16.0 build test --summary all
-      - if: ${{ !matrix.skip_zig16 }}
-        run: zig 0.16.0 build test --summary all
-        working-directory: patch
+        working-directory: test
       - run: zig 0.17.0 build test --summary all
-      - run: zig 0.17.0 build test --summary all
-        working-directory: patch
+        working-directory: test
       - if: ${{ !matrix.skip_zig16 }}
         run: zig 0.16.0 build update-patch
       - name: patches are up to date
