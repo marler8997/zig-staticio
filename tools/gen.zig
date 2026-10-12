@@ -15,7 +15,7 @@
 
 const std = @import("std");
 
-const vtable_fields = @typeInfo(std.Io.VTable).@"struct".field_names;
+const vtable_fields = std.meta.fieldNames(std.Io.VTable);
 
 /// Get `vtable_fns`, selected by `.threaded`. Uring, Kqueue and Dispatch don't
 /// match `std.Io.VTable` in zig 0.17.0.

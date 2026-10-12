@@ -6,22 +6,34 @@ on:
   workflow_dispatch:
 jobs:
   test:
+    name: test (${{ matrix.os }})
     strategy:
       matrix:
         include:
           - os: windows-latest
           - os: windows-11-arm
+            # zig build is broken on aarch64-windows in zig 0.16.0
+            skip_zig16: true
           - os: macos-latest
           - os: ubuntu-latest
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v7
-      - uses: mlugg/setup-zig@v2
-      - run: zig build test --summary all
-      - run: zig build test --summary all
+      - uses: marler8997/setup-anyzig@master
+      - if: ${{ !matrix.skip_zig16 }}
+        run: zig 0.16.0 build test --summary all
+      - if: ${{ !matrix.skip_zig16 }}
+        run: zig 0.16.0 build test --summary all
         working-directory: patch
-      - name: patch is up to date
+      - run: zig 0.17.0 build test --summary all
+      - run: zig 0.17.0 build test --summary all
+        working-directory: patch
+      - if: ${{ !matrix.skip_zig16 }}
+        run: zig 0.16.0 build update-patch
+      - name: patches are up to date
+        shell: bash
         run: |
-          zig build update-patch
+          zig 0.17.0 build update-patch
           git diff --exit-code
+          test -z "$(git status --porcelain)"

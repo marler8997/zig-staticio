@@ -26,9 +26,9 @@ pub fn build(b: *std.Build) void {
                 .target = b.graph.host,
             }),
         }));
-        gen.addDirectoryArg2(b.graph.path(.zig_lib, "std"), .{});
-        const generated = gen.addOutputFileArg2("std.patch", .{});
-        _ = gen.addDepFileOutputArg2("deps.d", .{});
+        gen.addDirectoryArg(zigStdDir(b));
+        const generated = gen.addOutputFileArg("std.patch");
+        _ = gen.addDepFileOutputArg("deps.d");
         const update = b.addUpdateSourceFiles();
         update.addCopyFileToSource(generated, patch_path);
         b.step("update-patch", "Regenerate the std patch for this zig version").dependOn(&update.step);
@@ -44,10 +44,10 @@ pub fn build(b: *std.Build) void {
         }),
     });
     test_step.dependOn(&b.addRunArtifact(t).step);
-    for ([_]struct { []const u8, std.lang.Optimize }{
+    for ([_]struct { []const u8, Optimize }{
         .{ "static", optimize },
         // other modes also reach the panic handler's operations
-        .{ "custom", .small },
+        .{ "custom", optimize_small },
     }) |exe| {
         test_step.dependOn(&b.addRunArtifact(b.addExecutable(.{
             .name = exe[0],
@@ -95,12 +95,22 @@ pub fn build(b: *std.Build) void {
 fn patchStd(b: *std.Build, patches: []const std.Build.LazyPath) std.Build.LazyPath {
     const run = b.addRunArtifact(b.dependency("patch", .{ .target = b.graph.host }).artifact("patch"));
     run.setName("patch std");
-    run.addDirectoryArg2(b.graph.path(.zig_lib, "std"), .{});
-    const dir = run.addOutputDirectoryArg2("std", .{});
-    _ = run.addDepFileOutputArg2("deps.d", .{});
+    run.addDirectoryArg(zigStdDir(b));
+    const dir = run.addOutputDirectoryArg("std");
+    _ = run.addDepFileOutputArg("deps.d");
     for (patches) |patch| run.addFileArg(patch);
     return dir;
 }
 
+/// The zig lib's std directory, `b.graph.path(.zig_lib, "std")` from zig 0.17.
+fn zigStdDir(b: *std.Build) std.Build.LazyPath {
+    if (zig_16) return .{ .cwd_relative = b.graph.zig_lib_directory.join(b.allocator, &.{"std"}) catch @panic("OOM") };
+    return b.graph.path(.zig_lib, "std");
+}
+
 const std = @import("std");
 const zig_version = @import("builtin").zig_version_string;
+const zig_16 = @import("builtin").zig_version.order(.{ .major = 0, .minor = 17, .patch = 0 }) == .lt;
+// std.builtin.OptimizeMode became std.lang.Optimize in zig 0.17
+const Optimize = if (zig_16) std.builtin.OptimizeMode else std.lang.Optimize;
+const optimize_small: Optimize = if (zig_16) .ReleaseSmall else .small;

@@ -2,7 +2,8 @@
     .name = .patch,
     .fingerprint = 0xe22b9636b3a32258,
     .version = "0.0.0",
-    .minimum_zig_version = "0.17.0",
+    .zig_version = "0.17.0",
+    .minimum_zig_version = "0.16.0",
     .paths = .{
         "build.zig",
         "build.zig.zon",
