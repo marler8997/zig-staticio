@@ -1,0 +1,9 @@
+A test patch applied on top of staticio's.
+
+diff --git a/std.zig b/std.zig
+--- a/std.zig
++++ b/std.zig
+@@ -22,2 +22,3 @@
+ pub const MultiArrayList = @import("multi_array_list.zig").MultiArrayList;
++pub const stack_test_decl = true;
+ pub const PriorityQueue = @import("priority_queue.zig").PriorityQueue;
