@@ -2,7 +2,7 @@
     .name = .staticio,
     .fingerprint = 0xf5ad4605b82097ca,
     .version = "0.0.0",
-    .zig_version = "0.17.0",
+    .zig_version = "0.17.1",
     .minimum_zig_version = "0.16.0",
     .paths = .{
         "build.zig",
