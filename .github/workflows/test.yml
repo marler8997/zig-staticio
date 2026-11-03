@@ -26,6 +26,8 @@ jobs:
         working-directory: test
       - run: zig 0.17.0 build test --summary all
         working-directory: test
+      - run: zig 0.17.1 build test --summary all
+        working-directory: test
       - if: ${{ !matrix.skip_zig16 }}
         run: zig 0.16.0 build update-patch
       - name: patches are up to date

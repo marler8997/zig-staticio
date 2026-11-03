@@ -17,7 +17,7 @@ It also debloats small release binaries and improves compile times. A stripped h
 
 ## Usage
 
-Supports zig 0.16.0 and 0.17.0. staticio is a patch of std, applied with [zig-patch](https://github.com/marler8997/zig-patch), so depend on both. `namedLazyPath("std.patch")` is the patch for the zig doing the build:
+Supports zig 0.16.0, 0.17.0 and 0.17.1. staticio is a patch of std, applied with [zig-patch](https://github.com/marler8997/zig-patch), so depend on both. `namedLazyPath("std.patch")` is the patch for the zig doing the build:
 
 ```zig
 // build.zig
@@ -43,7 +43,7 @@ pub const std_options: std.Options = .{ .io_vtable = .{ .custom = MyIo } };
 
 ## Implementation
 
-The patch (`src/std-<zig version>.patch`) behaves exactly like std unless the root module sets `std_options.io_vtable`, which turns `std.Io`'s runtime vtable pointer into a comptime field, making every `io.vtable.X(...)` a direct call. `Io.zig` becomes `IoRuntime.zig` (runtime vtable) and `IoStatic.zig` (comptime), so a direct `@import("Io.zig")` is a compile error instead of a silent runtime vtable. `zig build update-patch` regenerates it for the zig doing the build (see `tools/gen.zig`).
+The patch (`src/std-<zig version>.patch`) behaves exactly like std unless the root module sets `std_options.io_vtable`, which turns `std.Io`'s runtime vtable pointer into a comptime field, making every `io.vtable.X(...)` a direct call. `Io.zig` becomes `IoRuntime.zig` (runtime vtable) and `IoStatic.zig` (comptime), so a direct `@import("Io.zig")` is a compile error instead of a silent runtime vtable. `zig build update-patch` regenerates it for the zig doing the build (see `tools/gen.zig`). zig 0.17.1 uses the 0.17.0 patch, so regenerate that one with zig 0.17.0.
 
 ## Trade-off
 
